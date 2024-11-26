@@ -6,7 +6,7 @@ project 구조/
 │   ├── pgClient.js                # PostgreSQL connection setup.
 ├── models/
 │   ├── heritageImage.js           # HeritageImage data model.
-│   ├── heritageVO.js              # HeritageVO data model.
+│   ├── heritage.js              # HeritageVO data model.
 ├── routes/
 │   ├── heritageRoutes.js          # RESTful endpoints for API interaction.
 ├── app.js                         # Main entry point for the server.
@@ -15,3 +15,7 @@ project 구조/
                 # /fetcher = Openapi Importer (20)
                 # /(main page) = PostgreSQL Importer (5)
 
+사용법 : 
+        1. node app.js 입력(모듈 다운받고)
+        2. http://localhost:8000/ 예시 5개 출력 확인 
+        3. http://localhost:8000/fetcher  20개 출력 확인   

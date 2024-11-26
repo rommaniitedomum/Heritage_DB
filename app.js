@@ -45,7 +45,7 @@ app.get("/heritage1", async (req, res) => {
     const limitedData = data.slice(0, 20);
 
     res.json(limitedData);
-  } catch (error) {
+  } catch (err) {
     console.error("Error fetching data:", error);
     res.status(500).send("Server Error");
   }
@@ -56,7 +56,7 @@ app.get("/fetcher", async (req, res) => {
     const data = await callCurrentHeritageListByXML();
     // console.log(JSON.stringify(data, null, 2)); // Log the JSON representation
     res.status(200).json(data);
-  } catch (error) {
+  } catch (err) {
     console.error("Error in /fetcher route:", error.message);
     res.status(500).send("Server Error: Unable to fetch data");
   }
