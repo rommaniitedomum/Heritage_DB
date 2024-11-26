@@ -10,5 +10,8 @@ project 구조/
 ├── routes/
 │   ├── heritageRoutes.js          # RESTful endpoints for API interaction.
 ├── app.js                         # Main entry point for the server.
-
+|
+ㄴ────────────app(testial things) 
+                # /fetcher = Openapi Importer (20)
+                # /(main page) = PostgreSQL Importer (5)
 
