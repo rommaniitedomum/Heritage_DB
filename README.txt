@@ -6,7 +6,7 @@ project 구조/
 │   ├── pgClient.js                # PostgreSQL connection setup.
 ├── models/
 │   ├── heritageImage.js           # HeritageImage data model.
-│   ├── heritage.js              # HeritageVO data model.
+│   ├── heritage.js              # Heritage data model.
 ├── routes/
 │   ├── heritageRoutes.js          # RESTful endpoints for API interaction.
 ├── app.js                         # Main entry point for the server.
