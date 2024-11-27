@@ -7,6 +7,7 @@ const {
   callCurrentHeritageListByXML2,
 } = require("./routes/LocationDataRoutes");
 // const { callLimitedHeritageListByXML } = require("./routes/heritageRoutes");
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -15,23 +16,6 @@ app.get("/", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM Heritage;");
     res.json(result.rows);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server Error");
-  }
-});
-
-// Get a specific heritage entry by ID
-app.get("/", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = await pool.query("SELECT * FROM heritage WHERE sn = $1;", [
-      id,
-    ]);
-    if (result.rows.length === 0) {
-      return res.status(404).send("Heritage not found");
-    }
-    res.json(result.rows[0]);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
@@ -57,6 +41,36 @@ app.get("/fetcher2", async (req, res) => {
   } catch (err) {
     console.error("Error in /fetcher route:", error.message);
     res.status(500).send("Server Error: Unable to fetch data");
+  }
+});
+
+app.get("/heritage", async (req, res) => {
+  try {
+    const heritageList = await callCurrentHeritageListByXML2();
+    const html = `
+      <html>
+      <head>
+        <title>Heritage Images</title>
+      </head>
+      <body>
+        <h1>Heritage List</h1>
+        ${heritageList
+          .map(
+            (heritage) => `
+          <div>
+            <h2>${heritage.ccbaMnm1}</h2>
+            <p>${heritage.content}</p>
+            <img src="${heritage.imageUrl}" alt="${heritage.ccbaMnm1}" style="width:300px;"/>
+          </div>
+        `
+          )
+          .join("")}
+      </body>
+      </html>
+    `;
+    res.send(html);
+  } catch (error) {
+    res.status(500).send("Error fetching heritage data.");
   }
 });
 
