@@ -29,8 +29,8 @@ const fetchFestivalData = async (searchYear, searchMonth) => {
       return [];
     }
 
-    // Map and limit the data to 3 entries
-    const limitedData = itemArray.slice(0, 3).map((item) => ({
+    // *********************************************************출력 수정********************
+    const limitedData = itemArray.slice(0, 2).map((item) => ({
       programName: item.subTitle || "N/A", // 프로그램 이름
       programContent: item.subContent || "N/A", // 프로그램 내용
       startDate: item.sDate || "N/A", // 시작일자

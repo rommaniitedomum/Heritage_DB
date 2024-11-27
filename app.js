@@ -115,10 +115,8 @@ app.get("/festival", async (req, res) => {
     const searchYear = req.query.year || new Date().getFullYear();
     const searchMonth = req.query.month || new Date().getMonth() + 1;
 
+    // Already limited in fetchFestivalData
     const festivalList = await fetchFestivalData(searchYear, searchMonth);
-
-    // Limit to 3 items
-    const limitedFestivalList = festivalList.slice(0, 3);
 
     const html = `
       <html>
@@ -128,7 +126,7 @@ app.get("/festival", async (req, res) => {
       <body>
         <h1>Festival List</h1>
         <ul>
-          ${limitedFestivalList
+          ${festivalList
             .map(
               (festival) =>
                 `<li>
