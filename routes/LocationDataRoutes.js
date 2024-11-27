@@ -72,7 +72,7 @@ const callCurrentHeritageListByXML2 = async () => {
         totalFetched++; // Increment the counter
 
         // ***************아이템 가저오는 숫자***************************
-        if (totalFetched >= 2) {
+        if (totalFetched >= 1) {
           console.log("Fetched N items. Exiting...");
           return list;
         }

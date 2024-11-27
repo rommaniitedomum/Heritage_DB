@@ -12,6 +12,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Connect to PostgreSQL 테스트용
 app.get("/", async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM Heritage;");
@@ -21,7 +22,7 @@ app.get("/", async (req, res) => {
     res.status(500).send("Server Error");
   }
 });
-
+// 전체 출력 테스트
 app.get("/fetcher", async (req, res) => {
   try {
     const data = await callCurrentHeritageListByXML();
@@ -32,7 +33,7 @@ app.get("/fetcher", async (req, res) => {
     res.status(500).send("Server Error: Unable to fetch data");
   }
 });
-
+// 설정 리스트 출력 테스트
 app.get("/fetcher2", async (req, res) => {
   try {
     const data = await callCurrentHeritageListByXML2();
@@ -43,7 +44,7 @@ app.get("/fetcher2", async (req, res) => {
     res.status(500).send("Server Error: Unable to fetch data");
   }
 });
-
+// 카드 출력
 app.get("/heritage", async (req, res) => {
   try {
     const heritageList = await callCurrentHeritageListByXML2();
@@ -53,18 +54,42 @@ app.get("/heritage", async (req, res) => {
         <title>Heritage Images</title>
       </head>
       <body>
-        <h1>Heritage List</h1>
+        <h1>테스트 출력</h1>
         ${heritageList
           .map(
             (heritage) => `
           <div>
-            <h2>${heritage.ccbaMnm1}</h2>
+          <h2>${heritage.ccbaMnm1}</h2>
+          <img src="${heritage.imageUrl}" alt="${heritage.ccbaMnm1}" style="width:300px;"/>
             <p>${heritage.content}</p>
-            <img src="${heritage.imageUrl}" alt="${heritage.ccbaMnm1}" style="width:300px;"/>
           </div>
         `
           )
           .join("")}
+      </body>
+      </html>
+    `;
+    res.send(html);
+  } catch (error) {
+    res.status(500).send("Error fetching heritage data.");
+  }
+});
+// 제목 출력
+app.get("/heritageTitle", async (req, res) => {
+  try {
+    const heritageList = await callCurrentHeritageListByXML2();
+    const html = `
+      <html>
+      <head>
+        <title>Heritage Names</title>
+      </head>
+      <body>
+        <h1>Heritage List</h1>
+        <ul>
+          ${heritageList
+            .map((heritage) => `<li>${heritage.ccbaMnm1}</li>`)
+            .join("")}
+        </ul>
       </body>
       </html>
     `;
