@@ -88,7 +88,6 @@ const callCurrentHeritageListByXML = async () => {
           console.log("Fetched N items. Exiting...");
           return list;
         }
-        // ***************아이템 가저오는 숫자***************************
       }
     } catch (error) {
       console.error(`Error on page ${j}:`, error.message);

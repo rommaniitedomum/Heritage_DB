@@ -6,7 +6,7 @@ const { callCurrentHeritageListByXML } = require("./routes/fetchDataRoutes");
 const {
   callCurrentHeritageListByXML2,
 } = require("./routes/LocationDataRoutes");
-// const { callLimitedHeritageListByXML } = require("./routes/heritageRoutes");
+const { fetchFestivalData } = require("./routes/festivalDataFetcher");
 
 const app = express();
 app.use(cors());
@@ -99,4 +99,50 @@ app.get("/heritageTitle", async (req, res) => {
   }
 });
 
+app.get("/fetcher3", async (req, res) => {
+  try {
+    const data = await fetchFestivalData();
+    console.log(JSON.stringify(data, null, 2)); // Log the JSON representation
+    res.status(200).json(data);
+  } catch (err) {
+    console.error("Error in /fetcher route:", error.message);
+    res.status(500).send("Server Error: Unable to fetch data");
+  }
+});
+
+app.get("/festival", async (req, res) => {
+  try {
+    const searchYear = req.query.year || new Date().getFullYear();
+    const searchMonth = req.query.month || new Date().getMonth() + 1;
+
+    const festivalList = await fetchFestivalData(searchYear, searchMonth);
+
+    // Limit to 3 items
+    const limitedFestivalList = festivalList.slice(0, 3);
+
+    const html = `
+      <html>
+      <head>
+        <title>Festival List</title>
+      </head>
+      <body>
+        <h1>Festival List</h1>
+        <ul>
+          ${limitedFestivalList
+            .map(
+              (festival) =>
+                `<li>SeqNo: ${festival.seqNo} | SubDate: ${festival.subDate}</li>`
+            )
+            .join("")}
+        </ul>
+      </body>
+      </html>
+    `;
+
+    res.send(html);
+  } catch (error) {
+    console.error("Error in /festival route:", error);
+    res.status(500).send("Error fetching festival data.");
+  }
+});
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
