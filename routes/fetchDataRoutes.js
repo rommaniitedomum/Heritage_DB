@@ -6,21 +6,72 @@ const CURRENT_HERITAGE_INFO_URL =
 const CURRENT_HERITAGE_INFO_DETAIL_URL =
   "https://www.cha.go.kr/cha/SearchKindOpenapiDt.do";
 
-// Build detail URL
+/**
+ * Builds the detail URL for heritage info.
+ * @param {string} ccbaKdcd - Type code of the heritage.
+ * @param {string} ccbaAsno - Serial number of the heritage.
+ * @param {string} ccbaCtcd - Regional code of the heritage.
+ * @returns {string} - Constructed URL.
+ */
 const heritageInfo_Url = (ccbaKdcd, ccbaAsno, ccbaCtcd) => {
   return `${CURRENT_HERITAGE_INFO_DETAIL_URL}?ccbaKdcd=${ccbaKdcd}&ccbaAsno=${ccbaAsno}&ccbaCtcd=${ccbaCtcd}`;
 };
 
-const callCurrentHeritageListByXML = async () => {
-  const list = [];
-  let totalFetched = 0; // Counter to track total number of items fetched
+/**
+ * Cleans text by removing newlines, tabs, and extra whitespace.
+ * @param {string} text - The raw text to clean.
+ * @returns {string} - Cleaned text.
+ */
+const cleanText = (text) => {
+  return text?.replace(/\r\n|\n|\r|\t/g, "").trim() || "-";
+};
 
-  for (let j = 1; j < 100; j++) {
+/**
+ * Fetches the detail of a heritage item using its identifiers.
+ * @param {string} ccbaKdcd - Type code of the heritage.
+ * @param {string} ccbaAsno - Serial number of the heritage.
+ * @param {string} ccbaCtcd - Regional code of the heritage.
+ * @returns {object} - Parsed detail data.
+ */
+const fetchHeritageDetail = async (ccbaKdcd, ccbaAsno, ccbaCtcd) => {
+  try {
+    const detailResponse = await axios.get(
+      heritageInfo_Url(ccbaKdcd, ccbaAsno, ccbaCtcd),
+      {
+        headers: { Accept: "application/xml" },
+      }
+    );
+
+    const detailXmlText = detailResponse.data;
+    const detailJsonData = await parseStringPromise(detailXmlText);
+    const detailItem = detailJsonData.result?.item?.[0] || {};
+
+    return {
+      gcodeName: detailItem.gcodeName?.[0] || "-",
+      bcodeName: detailItem.bcodeName?.[0] || "-",
+      ccbaLcad: cleanText(detailItem.ccbaLcad?.[0] || "-"),
+      ccceName: cleanText(detailItem.ccceName?.[0] || "-"),
+      imageUrl: detailItem.imageUrl?.[0] || "-",
+      content: detailItem.content?.[0] || "-",
+    };
+  } catch (error) {
+    console.error("Error fetching heritage detail:", error.message);
+    return {};
+  }
+};
+
+/**
+ * Fetches the heritage list and processes it.
+ * @param {number} limit - Maximum number of heritage items to fetch.
+ * @returns {Array<object>} - List of heritage data.
+ */
+const callCurrentHeritageListByXML = async (limit = 2) => {
+  const heritageList = [];
+  let totalFetched = 0;
+
+  for (let pageIndex = 1; pageIndex < 100; pageIndex++) {
     try {
-      const url = `${CURRENT_HERITAGE_INFO_URL}?pageUnit=100&pageIndex=${j}`;
-      console.log(`Fetching page ${j}: ${url}`);
-
-      // Fetch data with Axios
+      const url = `${CURRENT_HERITAGE_INFO_URL}?pageUnit=100&pageIndex=${pageIndex}`;
       const response = await axios.get(url, {
         headers: {
           "Content-Type": "application/json",
@@ -28,15 +79,11 @@ const callCurrentHeritageListByXML = async () => {
         },
       });
 
-      const xmlText = response.data; // Axios automatically decodes response
-
-      // Parse XML to JSON
+      const xmlText = response.data;
       const jsonData = await parseStringPromise(xmlText);
-      const items = jsonData.result?.item || []; // Extract items safely
+      const items = jsonData.result?.item || [];
 
-      console.log(`Found ${items.length} items on page ${j}`);
       for (const item of items) {
-        // Build the heritage object
         const heritage = {
           sn: item.sn?.[0] || "-",
           no: item.no?.[0] || "-",
@@ -54,47 +101,25 @@ const callCurrentHeritageListByXML = async () => {
           ccbaCtcd: item.ccbaCtcd?.[0] || "-",
         };
 
-        console.log("Fetching detail for:", heritage.sn);
-        const detailResponse = await axios.get(
-          heritageInfo_Url(
-            heritage.ccbaKdcd,
-            heritage.ccbaAsno,
-            heritage.ccbaCtcd
-          ),
-          { headers: { Accept: "application/xml" } }
+        // Fetch and merge heritage details
+        const detail = await fetchHeritageDetail(
+          heritage.ccbaKdcd,
+          heritage.ccbaAsno,
+          heritage.ccbaCtcd
         );
+        const fullHeritage = { ...heritage, ...detail };
 
-        const detailXmlText = detailResponse.data;
-        const detailJsonData = await parseStringPromise(detailXmlText);
-        const detailItem = detailJsonData.result?.item?.[0] || {};
-        const cleanText = (text) => {
-          return text
-            .replace(/\r\n|\n|\r|\t/g, "") // Remove newlines and tabs
-            .trim(); // Remove leading/trailing whitespace
-        };
+        heritageList.push(fullHeritage);
+        totalFetched++;
 
-        heritage.gcodeName = detailItem.gcodeName?.[0] || "-";
-        heritage.bcodeName = detailItem.bcodeName?.[0] || "-";
-        heritage.ccbaLcad = cleanText(detailItem.ccbaLcad?.[0] || "-");
-        heritage.ccceName = cleanText(detailItem.ccceName?.[0] || "-");
-        heritage.imageUrl = detailItem.imageUrl?.[0] || "-";
-        heritage.content = detailItem.content?.[0] || "-";
-
-        list.push(heritage);
-        totalFetched++; // Increment the counter
-
-        // ***************아이템 가저오는 숫자***************************
-        if (totalFetched >= 2) {
-          console.log("Fetched N items. Exiting...");
-          return list;
-        }
+        if (totalFetched >= limit) return heritageList; // Stop once limit is reached
       }
     } catch (error) {
-      console.error(`Error on page ${j}:`, error.message);
+      console.error(`Error on page ${pageIndex}:`, error.message);
     }
   }
 
-  return list;
+  return heritageList;
 };
 
 callCurrentHeritageListByXML()
