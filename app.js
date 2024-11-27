@@ -131,18 +131,38 @@ app.get("/festival", async (req, res) => {
           ${limitedFestivalList
             .map(
               (festival) =>
-                `<li>SeqNo: ${festival.seqNo} | SubDate: ${festival.subDate}</li>`
+                `<li>
+                  <h2>${festival.programName}</h2>
+                  <p><strong>Program Content:</strong> ${
+                    festival.programContent
+                  }</p>
+                  <p><strong>Start Date:</strong> ${festival.startDate}</p>
+                  <p><strong>End Date:</strong> ${festival.endDate}</p>
+                  <p><strong>Location:</strong> ${festival.location}</p>
+                  <p><strong>Contact:</strong> ${festival.contact}</p>
+                  ${
+                    festival.image !== "N/A"
+                      ? `<p><strong>Image:</strong> <img src="${festival.image}" alt="${festival.programName}" width="200"></p>`
+                      : ""
+                  }
+                  <p><strong>Target Audience:</strong> ${
+                    festival.targetAudience
+                  }</p>
+                  <p><strong>Additional Info:</strong> ${
+                    festival.additionalInfo
+                  }</p>
+                </li>`
             )
             .join("")}
         </ul>
       </body>
       </html>
     `;
-
     res.send(html);
   } catch (error) {
     console.error("Error in /festival route:", error);
     res.status(500).send("Error fetching festival data.");
   }
 });
+
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));

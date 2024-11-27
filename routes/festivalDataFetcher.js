@@ -29,27 +29,25 @@ const fetchFestivalData = async (searchYear, searchMonth) => {
       return [];
     }
 
-    // Map and limit the data to 3 entries with seqNo and subDate
+    // Map and limit the data to 3 entries
     const limitedData = itemArray.slice(0, 3).map((item) => ({
-      seqNo: item.seqNo || "N/A",
-      subDate: item.subDate || "N/A",
+      programName: item.subTitle || "N/A", // 프로그램 이름
+      programContent: item.subContent || "N/A", // 프로그램 내용
+      startDate: item.sDate || "N/A", // 시작일자
+      endDate: item.eDate || "N/A", // 종료일자
+      location: item.subDesc || "N/A", // 장소
+      contact: item.contact || "N/A", // 문의
+      image: item.fileNm || "N/A", // 이미지
+      targetAudience: item.subDesc1 || "N/A", // 참여대상
+      additionalInfo: `${item.subDesc2 || "N/A"}, ${item.subDesc_3 || "N/A"}`, // 기타 (가격 등)
     }));
 
-    console.log(
-      "Extracted Festival Data (seqNo and subDate only):",
-      limitedData
-    );
-    return limitedData; // Returns the limited data
+    console.log("Extracted Festival Data:", limitedData);
+    return limitedData;
   } catch (error) {
     console.error("Error fetching or parsing festival data:", error);
     return [];
   }
 };
-
-// Example usage
-(async () => {
-  const festivalData = await fetchFestivalData(2024, 11);
-  console.log("Final Output:", festivalData);
-})();
 
 module.exports = { fetchFestivalData };
