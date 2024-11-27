@@ -67,18 +67,25 @@ const callCurrentHeritageListByXML = async () => {
         const detailXmlText = detailResponse.data;
         const detailJsonData = await parseStringPromise(detailXmlText);
         const detailItem = detailJsonData.result?.item?.[0] || {};
+        const cleanText = (text) => {
+          return text
+            .replace(/\r\n|\n|\r|\t/g, "") // Remove newlines and tabs
+            .trim(); // Remove leading/trailing whitespace
+        };
 
         heritage.gcodeName = detailItem.gcodeName?.[0] || "-";
         heritage.bcodeName = detailItem.bcodeName?.[0] || "-";
+        heritage.ccbaLcad = cleanText(detailItem.ccbaLcad?.[0] || "-");
+        heritage.ccceName = cleanText(detailItem.ccceName?.[0] || "-");
         heritage.imageUrl = detailItem.imageUrl?.[0] || "-";
         heritage.content = detailItem.content?.[0] || "-";
 
         list.push(heritage);
         totalFetched++; // Increment the counter
 
-        // Stop fetching after 20 items
-        if (totalFetched >= 20) {
-          console.log("Fetched 20 items. Exiting...");
+        // ***************아이템 가저오는 숫자***************************
+        if (totalFetched >= 2) {
+          console.log("Fetched N items. Exiting...");
           return list;
         }
       }

@@ -2,7 +2,11 @@ const PORT = 8000;
 const express = require("express");
 const pool = require("./pgClient");
 const cors = require("cors");
-const { callCurrentHeritageListByXML } = require("./fetchData");
+const { callCurrentHeritageListByXML } = require("./routes/fetchDataRoutes");
+const {
+  callCurrentHeritageListByXML2,
+} = require("./routes/LocationDataRoutes");
+// const { callLimitedHeritageListByXML } = require("./routes/heritageRoutes");
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -34,27 +38,21 @@ app.get("/", async (req, res) => {
   }
 });
 
-app.get("/heritage1", async (req, res) => {
-  try {
-    const response = await axios.get(
-      "https://www.cha.go.kr/cha/SearchKindOpenapiList.do"
-    );
-    const data = response.data;
-
-    // Assuming the data is an array; adjust if the structure is different
-    const limitedData = data.slice(0, 20);
-
-    res.json(limitedData);
-  } catch (err) {
-    console.error("Error fetching data:", error);
-    res.status(500).send("Server Error");
-  }
-});
-
 app.get("/fetcher", async (req, res) => {
   try {
     const data = await callCurrentHeritageListByXML();
-    // console.log(JSON.stringify(data, null, 2)); // Log the JSON representation
+    console.log(JSON.stringify(data, null, 2)); // Log the JSON representation
+    res.status(200).json(data);
+  } catch (err) {
+    console.error("Error in /fetcher route:", error.message);
+    res.status(500).send("Server Error: Unable to fetch data");
+  }
+});
+
+app.get("/fetcher2", async (req, res) => {
+  try {
+    const data = await callCurrentHeritageListByXML2();
+    console.log(JSON.stringify(data, null, 2)); // Log the JSON representation
     res.status(200).json(data);
   } catch (err) {
     console.error("Error in /fetcher route:", error.message);
